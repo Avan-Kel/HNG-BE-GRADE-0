@@ -58,6 +58,7 @@ app.use((req, res) => {
 });
 
 // Listen on all interfaces (important for Railway)
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ Server running on port ${PORT}`);
+app.listen(process.env.PORT || 3007, '0.0.0.0', () => {
+  console.log(`Server running on port ${process.env.PORT || 3007}`);
 });
+
