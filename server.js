@@ -7,21 +7,22 @@ dotenv.config();
 
 const app = express();
 
-// redirects port from env value to the below if an error is encountered in the port or is in use
+// Use Railway’s port or fallback for local dev
 const PORT = process.env.PORT || 3007;
 
-// Project middlewares 
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// GET endpoint for /me route
+// Root route (optional check)
+app.get("/", (req, res) => {
+  res.send("Backend is live ✅ - Go to /me to see details");
+});
+
+// /me endpoint
 app.get("/me", async (req, res) => {
   try {
-    // Cat fact api request
-    const catFactResponse = await axios.get("https://catfact.ninja/fact", {
-      timeout: 5000, // Timeout handling for external api call 
-    });
-
+    const catFactResponse = await axios.get("https://catfact.ninja/fact", { timeout: 5000 });
     const catFact = catFactResponse.data.fact;
 
     const responseData = {
@@ -35,13 +36,10 @@ app.get("/me", async (req, res) => {
       fact: catFact,
     };
 
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).json(responseData);
+    res.json(responseData);
   } catch (error) {
     console.error("Error fetching cat fact:", error.message);
-
-   // Handle for potential Cat API failure
-    res.status(200).json({
+    res.json({
       status: "success",
       user: {
         email: process.env.USER_EMAIL,
@@ -54,10 +52,12 @@ app.get("/me", async (req, res) => {
   }
 });
 
+// Handle 404s
 app.use((req, res) => {
   res.status(404).json({ status: "error", message: "Endpoint not found" });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running at http://localhost:${PORT}/me`);
+// Listen on all interfaces (important for Railway)
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
